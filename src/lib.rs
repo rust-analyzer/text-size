@@ -1,8 +1,7 @@
 #[cfg(feature = "serde")]
 extern crate serde;
 
-use std::{fmt, ops, iter};
-
+use std::{fmt, iter, ops};
 
 /// An offset into text.
 /// Offset is represented as `u32` storing number of utf8-bytes,
@@ -37,7 +36,8 @@ impl TextUnit {
 
     #[inline(always)]
     pub fn from_usize(size: usize) -> TextUnit {
-        #[cfg(debug_assertions)] {
+        #[cfg(debug_assertions)]
+        {
             if size > u32::max_value() as usize {
                 panic!("overflow when converting to TextUnit: {}", size)
             }
@@ -198,13 +198,13 @@ range_ops_impls!(Add, add, +, AddAssign, add_assign);
 range_ops_impls!(Sub, sub, -, SubAssign, sub_assign);
 
 impl<'a> iter::Sum<&'a TextUnit> for TextUnit {
-    fn sum<I: Iterator<Item=&'a TextUnit>>(iter: I) -> TextUnit {
+    fn sum<I: Iterator<Item = &'a TextUnit>>(iter: I) -> TextUnit {
         iter.fold(TextUnit::from(0), ops::Add::add)
     }
 }
 
 impl iter::Sum<TextUnit> for TextUnit {
-    fn sum<I: Iterator<Item=TextUnit>>(iter: I) -> TextUnit {
+    fn sum<I: Iterator<Item = TextUnit>>(iter: I) -> TextUnit {
         iter.fold(TextUnit::from(0), ops::Add::add)
     }
 }
@@ -223,10 +223,7 @@ pub struct TextRange {
 impl TextRange {
     #[inline(always)]
     pub fn checked_sub(self, other: TextUnit) -> Option<TextRange> {
-        let res = TextRange::offset_len(
-            self.start().checked_sub(other)?,
-            self.len()
-        );
+        let res = TextRange::offset_len(self.start().checked_sub(other)?, self.len());
         Some(res)
     }
 }
@@ -287,8 +284,7 @@ impl TextRange {
 
     #[inline(always)]
     pub fn is_subrange(&self, other: &TextRange) -> bool {
-        other.start() <= self.start()
-            && self.end() <= other.end()
+        other.start() <= self.start() && self.end() <= other.end()
     }
 
     #[inline(always)]
@@ -331,8 +327,8 @@ impl ops::Index<TextRange> for String {
 
 #[cfg(feature = "serde")]
 mod serde_impls {
-    use serde::{Serialize, Serializer, Deserialize, Deserializer};
-    use {TextUnit, TextRange};
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use {TextRange, TextUnit};
 
     impl Serialize for TextUnit {
         fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
@@ -376,14 +372,8 @@ mod tests {
     fn test_ops() {
         let r = TextRange::from_to(10.into(), 20.into());
         let u: TextUnit = 5.into();
-        assert_eq!(
-            r + u,
-            TextRange::from_to(15.into(), 25.into()),
-        );
-        assert_eq!(
-            r - u,
-            TextRange::from_to(5.into(), 15.into()),
-        );
+        assert_eq!(r + u, TextRange::from_to(15.into(), 25.into()),);
+        assert_eq!(r - u, TextRange::from_to(5.into(), 15.into()),);
     }
 
     #[test]
@@ -393,7 +383,10 @@ mod tests {
         assert_eq!(x.checked_sub(2.into()), None);
 
         let r = TextRange::from_to(1.into(), 2.into());
-        assert_eq!(r.checked_sub(1.into()), Some(TextRange::from_to(0.into(), 1.into())));
+        assert_eq!(
+            r.checked_sub(1.into()),
+            Some(TextRange::from_to(0.into(), 1.into()))
+        );
         assert_eq!(x.checked_sub(2.into()), None);
     }
 
