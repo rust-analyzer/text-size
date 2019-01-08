@@ -401,4 +401,26 @@ mod tests {
         assert!(r2.is_subrange(&r1));
         assert!(!r3.is_subrange(&r1));
     }
+
+    #[test]
+    fn check_intersection() {
+        assert_eq!(r(1, 2).intersection(&r(2, 3)), Some(r(2, 2)));
+        assert_eq!(r(1, 5).intersection(&r(2, 3)), Some(r(2, 3)));
+        assert_eq!(r(1, 2).intersection(&r(3, 4)), None);
+    }
+
+    #[test]
+    fn check_contains() {
+        assert!(!r(1, 3).contains(0.into()));
+        assert!(r(1, 3).contains(1.into()));
+        assert!(r(1, 3).contains(2.into()));
+        assert!(!r(1, 3).contains(3.into()));
+        assert!(!r(1, 3).contains(4.into()));
+
+        assert!(!r(1, 3).contains_inclusive(0.into()));
+        assert!(r(1, 3).contains_inclusive(1.into()));
+        assert!(r(1, 3).contains_inclusive(2.into()));
+        assert!(r(1, 3).contains_inclusive(3.into()));
+        assert!(!r(1, 3).contains_inclusive(4.into()));
+    }
 }
