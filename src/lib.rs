@@ -290,6 +290,27 @@ impl TextRange {
         other.start() <= self.start()
             && self.end() <= other.end()
     }
+
+    #[inline(always)]
+    pub fn intersection(&self, other: &TextRange) -> Option<TextRange> {
+        let start = self.start.max(other.start());
+        let end = self.end.min(other.end());
+        if start <= end {
+            Some(TextRange::from_to(start, end))
+        } else {
+            None
+        }
+    }
+
+    #[inline(always)]
+    pub fn contains(&self, offset: TextUnit) -> bool {
+        self.start() <= offset && offset < self.end()
+    }
+
+    #[inline(always)]
+    pub fn contains_inclusive(&self, offset: TextUnit) -> bool {
+        self.start() <= offset && offset <= self.end()
+    }
 }
 
 impl ops::Index<TextRange> for str {
