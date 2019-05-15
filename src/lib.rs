@@ -220,17 +220,6 @@ pub struct TextRange {
     end: TextUnit,
 }
 
-impl TextRange {
-    #[inline(always)]
-    pub fn checked_sub(self, other: TextUnit) -> Option<TextRange> {
-        let res = TextRange::offset_len(
-            self.start().checked_sub(other)?,
-            self.len()
-        );
-        Some(res)
-    }
-}
-
 impl fmt::Debug for TextRange {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         <Self as fmt::Display>::fmt(self, f)
@@ -289,6 +278,25 @@ impl TextRange {
     pub fn is_subrange(&self, other: &TextRange) -> bool {
         other.start() <= self.start()
             && self.end() <= other.end()
+    }
+
+    #[inline(always)]
+    pub fn checked_sub(self, other: TextUnit) -> Option<TextRange> {
+        let res = TextRange::offset_len(
+            self.start().checked_sub(other)?,
+            self.len()
+        );
+        Some(res)
+    }
+}
+
+impl ops::RangeBounds<TextUnit> for TextRange {
+    fn start_bound(&self) -> ops::Bound<&TextUnit> {
+        ops::Bound::Included(&self.start)
+    }
+
+    fn end_bound(&self) -> ops::Bound<&TextUnit> {
+        ops::Bound::Excluded(&self.end)
     }
 }
 
