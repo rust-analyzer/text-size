@@ -49,6 +49,16 @@ impl TextSize {
     pub const fn zero() -> TextSize {
         TextSize(0)
     }
+
+    /// Cast to `usize`.
+    pub const fn to_usize(self) -> usize {
+        assert_lossless_conversion();
+        return self.raw as usize;
+
+        const fn assert_lossless_conversion() {
+            [()][(std::mem::size_of::<usize>() < std::mem::size_of::<u32>()) as usize]
+        }
+    }
 }
 
 /// Methods to act like a primitive integer type, where reasonably applicable.
@@ -91,12 +101,7 @@ impl TryFrom<usize> for TextSize {
 
 impl From<TextSize> for usize {
     fn from(value: TextSize) -> Self {
-        assert_lossless_conversion();
-        return value.raw as usize;
-
-        const fn assert_lossless_conversion() {
-            [()][(std::mem::size_of::<usize>() < std::mem::size_of::<u32>()) as usize]
-        }
+        value.to_usize()
     }
 }
 
