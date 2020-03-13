@@ -32,7 +32,10 @@ pub(crate) const fn TextSize(raw: u32) -> TextSize {
 
 impl fmt::Debug for TextSize {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.raw)
+        match self.raw {
+            u32::MAX => write!(f, "∞"),
+            raw => write!(f, "{}", raw),
+        }
     }
 }
 
@@ -49,6 +52,11 @@ impl TextSize {
     pub const fn zero() -> TextSize {
         TextSize(0)
     }
+
+    /// A size of one.
+    pub const fn one() -> TextSize {
+        TextSize(1)
+    }
 }
 
 /// Methods to act like a primitive integer type, where reasonably applicable.
@@ -56,12 +64,14 @@ impl TextSize {
 impl TextSize {
     /// The smallest representable text size. (`u32::MIN`)
     pub const MIN: TextSize = TextSize(u32::MIN);
-    /// The largest representable text size. (`u32::MAX`)
-    pub const MAX: TextSize = TextSize(u32::MAX);
+    /// The largest representable text size. (`u32::MAX - 1`)
+    pub const MAX: TextSize = TextSize(u32::MAX - 1);
+    /// An infinite, unbounded text size, larger than `TextSize::MAX`.
+    pub const INF: TextSize = TextSize(u32::MAX);
 
     #[allow(missing_docs)]
-    pub fn checked_add(self, rhs: TextSize) -> Option<TextSize> {
-        self.raw.checked_add(rhs.raw).map(TextSize)
+    pub fn saturating_add(self, rhs: TextSize) -> TextSize {
+        TextSize(self.raw.saturating_add(rhs.raw))
     }
 
     #[allow(missing_docs)]
@@ -70,12 +80,14 @@ impl TextSize {
     }
 }
 
+// now questionable
 impl From<u32> for TextSize {
     fn from(raw: u32) -> Self {
         TextSize { raw }
     }
 }
 
+// now questionable
 impl From<TextSize> for u32 {
     fn from(value: TextSize) -> Self {
         value.raw
@@ -85,10 +97,12 @@ impl From<TextSize> for u32 {
 impl TryFrom<usize> for TextSize {
     type Error = TryFromIntError;
     fn try_from(value: usize) -> Result<Self, TryFromIntError> {
+        // now questionable
         Ok(u32::try_from(value)?.into())
     }
 }
 
+// now questionable
 impl From<TextSize> for usize {
     fn from(value: TextSize) -> Self {
         assert_lossless_conversion();

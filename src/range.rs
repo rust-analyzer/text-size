@@ -3,6 +3,7 @@ use {
     std::{
         cmp, fmt,
         ops::{Bound, Index, IndexMut, Range, RangeBounds},
+        u32,
     },
 };
 
@@ -35,7 +36,7 @@ pub struct TextRange {
 
 impl fmt::Debug for TextRange {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}..{}", self.start().raw, self.end().raw)
+        write!(f, "{:?}..{:?}", self.start(), self.end())
     }
 }
 
@@ -73,7 +74,10 @@ impl TextRange {
     /// The size of this range.
     pub const fn len(self) -> TextSize {
         // HACK for const fn: math on primitives only
-        TextSize(self.end().raw - self.start().raw)
+        [
+            TextSize(self.end.raw - self.start.raw), // true
+            TextSize::INF,                           // false
+        ][((self.end.raw < u32::MAX) & !self.is_empty()) as usize]
     }
 
     /// Check if this range empty or reversed.
@@ -130,13 +134,21 @@ impl TextRange {
 impl Index<TextRange> for str {
     type Output = str;
     fn index(&self, index: TextRange) -> &Self::Output {
-        &self[Range::<usize>::from(index)]
+        let start: usize = index.start().into();
+        match index.end {
+            TextSize::INF => &self[start..],
+            end => &self[start..end.into()],
+        }
     }
 }
 
 impl IndexMut<TextRange> for str {
     fn index_mut(&mut self, index: TextRange) -> &mut Self::Output {
-        &mut self[Range::<usize>::from(index)]
+        let start: usize = index.start().into();
+        match index.end {
+            TextSize::INF => &mut self[start..],
+            end => &mut self[start..end.into()],
+        }
     }
 }
 
@@ -146,10 +158,14 @@ impl RangeBounds<TextSize> for TextRange {
     }
 
     fn end_bound(&self) -> Bound<&TextSize> {
-        Bound::Excluded(&self.end)
+        match &self.end {
+            &TextSize::INF => Bound::Unbounded,
+            end => Bound::Excluded(end),
+        }
     }
 }
 
+// now questionable
 impl<T> From<TextRange> for Range<T>
 where
     T: From<TextSize>,
