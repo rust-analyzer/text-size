@@ -1,5 +1,5 @@
 use {
-    std::{borrow::Cow, ops::Deref},
+    std::{borrow::Cow, ops::Deref, sync::Arc},
     text_size::*,
 };
 
@@ -14,18 +14,22 @@ impl Deref for StringLike<'_> {
 
 #[test]
 fn main() {
-    let s = "";
-    let _ = TextSize::of(&s);
+    macro_rules! test {
+        ($($expr:expr),+ $(,)?) => {
+            $({
+                let s = $expr;
+                let _ = TextSize::of(&s);
+            })+
+        };
+    }
 
-    let s = String::new();
-    let _ = TextSize::of(&s);
-
-    let s = Cow::Borrowed("");
-    let _ = TextSize::of(&s);
-
-    let s = Cow::Owned(String::new());
-    let _ = TextSize::of(&s);
-
-    let s = StringLike("");
-    let _ = TextSize::of(&s);
+    test! {
+        "",
+        String::new(),
+        Cow::Borrowed(""),
+        Cow::Owned::<str>(String::new()),
+        StringLike(""),
+        Arc::new(""),
+        Arc::new(String::new()),
+    }
 }

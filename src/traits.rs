@@ -16,9 +16,9 @@ impl LenTextSize for &'_ str {
     }
 }
 
-impl<D> LenTextSize for &'_ D
+impl<D: Deref> LenTextSize for &'_ D
 where
-    D: Deref<Target = str>,
+    for<'a> &'a D::Target: LenTextSize,
 {
     #[inline]
     fn len_text_size(self) -> TextSize {
