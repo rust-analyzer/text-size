@@ -27,33 +27,50 @@ impl<D> TextLen for &'_ D
 where
     D: TextLen + Copy,
 {
+    #[inline]
     fn text_len(self) -> TextSize {
         D::text_len(*self)
     }
 }
 
-// Because we could not find a smart blanket impl to do this automatically and
-// cleanly (rust-analyzer/text-size#36), just provide a bunch of manual impls.
-// If a standard type fits in this macro and you need it to impl TextLen, just
-// open a PR and we are likely to accept it. Or convince Rust to deref to &str.
-macro_rules! impl_textlen_for_string {
-    ($($ty:ty),+ $(,)?) => {$(
-        impl TextLen for $ty {
+impl TextLen for &'_ String {
+    #[inline]
+    fn text_len(self) -> TextSize {
+        <&str>::text_len(self)
+    }
+}
+
+impl TextLen for &'_ Box<str> {
+    #[inline]
+    fn text_len(self) -> TextSize {
+        <&str>::text_len(self)
+    }
+}
+
+macro_rules! impl_textlen_for_smartptr {
+    ($(&$ty:ident),+ $(,)?) => {$(
+        impl<'a, T: ?Sized> TextLen for &'a $ty<T>
+        where
+            &'a T: TextLen,
+        {
             #[inline]
             fn text_len(self) -> TextSize {
-                <&str>::text_len(self)
+                <&'a T>::text_len(self)
             }
         }
     )+};
 }
 
-impl_textlen_for_string! {
-    &Box<str>,
-    &String,
-    &Cow<'_, str>,
-    &Cow<'_, String>,
-    &Arc<str>,
-    &Arc<String>,
-    &Rc<str>,
-    &Rc<String>,
+// <https://internals.rust-lang.org/t/_/12139>
+// = node: downstream crates may implement trait `std::marker::Copy` for type `std::boxed::Box<_>`
+impl_textlen_for_smartptr!(/*&Box,*/ &Arc, &Rc);
+
+impl<'a, B: ?Sized> TextLen for &'a Cow<'a, B>
+    where
+        B: ToOwned,
+        &'a B: TextLen
+{
+    fn text_len(self) -> TextSize {
+        <&'a B>::text_len(&**self)
+    }
 }
