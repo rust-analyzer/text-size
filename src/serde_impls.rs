@@ -1,5 +1,6 @@
 use {
     crate::{TextRange, TextSize},
+    alloc::format,
     serde::{de, Deserialize, Deserializer, Serialize, Serializer},
 };
 

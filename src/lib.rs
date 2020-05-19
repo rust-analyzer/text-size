@@ -18,6 +18,9 @@
 
 #![forbid(unsafe_code)]
 #![warn(missing_debug_implementations, missing_docs)]
+#![no_std]
+
+extern crate alloc;
 
 mod range;
 mod size;

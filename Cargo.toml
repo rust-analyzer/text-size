@@ -11,6 +11,7 @@ description = "Newtypes for text offsets"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/rust-analyzer/text-size"
 documentation = "https://docs.rs/text-size"
+categories = ["no-std"]
 
 [dependencies]
 serde = { version = "1.0", optional = true, default_features = false }

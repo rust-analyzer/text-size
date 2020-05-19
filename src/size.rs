@@ -1,6 +1,6 @@
 use {
     crate::TextLen,
-    std::{
+    core::{
         convert::TryFrom,
         fmt, iter,
         num::TryFromIntError,

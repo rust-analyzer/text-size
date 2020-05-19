@@ -1,6 +1,7 @@
 use {
     crate::TextSize,
-    std::{
+    alloc::string::String,
+    core::{
         cmp, fmt,
         ops::{Add, AddAssign, Bound, Index, IndexMut, Range, RangeBounds, Sub, SubAssign},
     },
