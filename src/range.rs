@@ -1,3 +1,5 @@
+use std::convert::{TryFrom, TryInto};
+
 use cmp::Ordering;
 
 use {
@@ -389,6 +391,20 @@ where
     #[inline]
     fn from(r: TextRange) -> Self {
         r.start().into()..r.end().into()
+    }
+}
+
+impl<T> TryFrom<Range<T>> for TextRange
+where
+    T: TryInto<TextSize>,
+{
+    type Error = <T as TryInto<TextSize>>::Error;
+    #[inline]
+    fn try_from(value: Range<T>) -> Result<Self, Self::Error> {
+        Ok(TextRange::new(
+            value.start.try_into()?,
+            value.end.try_into()?,
+        ))
     }
 }
 
