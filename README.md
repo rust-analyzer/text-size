@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> This crate now lives in https://github.com/rust-lang/rust-analyzer/tree/master/lib/text-size
+
 # text-size
 
 [![Build Status](https://travis-ci.org/matklad/text-size.svg?branch=master)](https://travis-ci.org/matklad/text-size)
